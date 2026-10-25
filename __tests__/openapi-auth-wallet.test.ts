@@ -1,4 +1,4 @@
-/*
+/**
  * OpenAPI examples coverage for GET/POST /api/auth/wallet (issue #1105).
  */
 import { readFileSync } from 'fs'; 
@@ -30,6 +30,24 @@ describe('OpenAPI examples /api/auth/wallet', () => {
         expires_at: expect.any(String),
       }),
     );
+  });
+
+  it('GET 200 walletChallenge example validates against the response schema', () => {
+    const content = wallet.get.responses['200'].content['application/json'];
+    const schemaRef: string = content.schema.$ref;
+    const schemaName = schemaRef.replace('#/components/schemas/', '');
+    const schema = spec.components.schemas[schemaName];
+    const exampleValue = content.examples.walletChallenge.value;
+
+    expect(schema).toBeDefined();
+    for (const requiredKey of schema.required ?? []) {
+      expect(exampleValue[requiredKey]).toBeDefined();
+    }
+    for (const [propName, propSchema] of Object.entries<any>(schema.properties ?? {})) {
+      if (exampleValue[propName] !== undefined) {
+        expect(typeof exampleValue[propName]).toBe(propSchema.type);
+      }
+    }
   });
 
   it('GET error responses include example envelopes with request_id', () => {
